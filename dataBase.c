@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <tkDecls.h>
+#include <string.h>
+#include <ctype.h>
 #include "dataBase.h"
 
-/*A Red-Black tree node structure*/
-
+node *theRicher;
 
 /*Left Rotation*/
 void leftRotate(node **root, node *x)
 {
+    extern node *nilT;
     /*y stored pointer of right child of x*/
     node *y = x->right;
 
@@ -16,14 +17,14 @@ void leftRotate(node **root, node *x)
     x->right = y->left;
 
     /*update parent pointer of x's right*/
-    if(y->left != NULL)
+    if(y->left != nilT)
         y->left->parent = x;
 
     /*update y's parent pointer*/
     y->parent = x->parent;
 
-    /*if x's parent is null make y as root of tree*/
-    if(x->parent == NULL)
+    /*if x's parent is nilT make y as root of tree*/
+    if(x->parent == nilT)
         (*root) = y;
 
         /*store y at the place of x*/
@@ -43,12 +44,13 @@ void leftRotate(node **root, node *x)
 /*Right Rotation (Similar to LeftRotate)*/
 void rightRotate(node **root, node *x)
 {
+    extern node *nilT;
     node *y = x->left;
     x->left = y->right;
-    if(y->right != NULL)
+    if(y->right != nilT)
         y->right->parent = x;
     y->parent = x->parent;
-    if(x->parent == NULL)
+    if(x->parent == nilT)
         (*root) = y;
     else if(x == x->parent->right)
         x->parent->right = y;
@@ -60,11 +62,11 @@ void rightRotate(node **root, node *x)
 /*Utility function to fixup the Red-Black tree after standard BST insertion*/
 void insertFixUp(node **root, node *z)
 {
+    extern node *nilT;
     /*iterate until z is not the root and z's parent color is red*/
-    while(z != *root && z->parent->color == RED)
+    while(z->parent->color == RED)
     {
         node *y;
-
         /*Find uncle and store uncle in y*/
         if(z->parent == z->parent->parent->left)
         {
@@ -106,75 +108,81 @@ void insertFixUp(node **root, node *z)
                 z = z->parent->parent;
             }
                 /*Case 2*/
-            else if(z == z->parent->right)
+            else if(z == z->parent->left)
             {
                 z = z->parent;
-                leftRotate(root, z);
+                rightRotate(root, z);
                 z->parent->color = BLACK;
                 z->parent->parent->color = RED;
-                rightRotate(root, z->parent->parent);
+                leftRotate(root, z->parent->parent);
             }
                 /*Case 3*/
             else
             {
                 z->parent->color = BLACK;
                 z->parent->parent->color = RED;
-                rightRotate(root, z->parent->parent);
+                leftRotate(root, z->parent->parent);
             }
         }
     }
-    (*root)->color = BLACK; //keep root always black
+    /*keep root always black*/
+    (*root)->color = BLACK;
 }
 
 // Utility function to insert newly node in RedBlack tree
 void insert(node **root, int accountID, int ID, int cash, char *name)
 {
+    extern node *nilT;
     // Allocate memory for new node
-    node *z = (node *) malloc(sizeof(node));
+    node *z = (node *) calloc(ONE_NODE, sizeof(node));
+    if(!z)
+    {
+        printf("Memory allocation failed");
+        exit(0);
+    }
     z->accountID = accountID;
-    z->name = name;
+    strcpy(z->name, name);
     z->ID = ID;
     z->cash = cash;
-    z->left = z->right = z->parent = NULL;
-
-    //if root is null make z as root
-    if(*root == NULL)
+    z->left = nilT;
+    z->right = nilT;
+    z->parent = nilT;
+    if(z->cash > theRicher->cash)
     {
-        z->color = BLACK;
-        (*root) = z;
+        theRicher->cash = z->cash;
+        theRicher->accountID = z->accountID;
+        theRicher->ID = z->ID;
+        strcpy(theRicher->name,z->name);
     }
-    else
-    {
-        node *y = NULL;
-        node *x = (*root);
+    node *y = nilT;
+    node *x = (*root);
 
-        // Follow standard BST insert steps to first insert the node
-        while(x != NULL)
-        {
-            y = x;
-            if(z->accountID < x->accountID)
-                x = x->left;
-            else
-                x = x->right;
-        }
-        z->parent = y;
-        if(y == NULL)
-            (*root) = z;
-        else if(z->accountID < y->accountID)
-            y->left = z;
+    // Follow standard BST insert steps to first insert the node
+    while(x != nilT)
+    {
+        y = x;
+        if(z->accountID < x->accountID)
+            x = x->left;
         else
-            y->right = z;
-        z->color = RED;
-
-        // call insertFixUp to fix reb-black tree's property if it
-        // is voilated due to insertion.
-        insertFixUp(root, z);
+            x = x->right;
     }
+    z->parent = y;
+    if(y == nilT)
+        (*root) = z;
+    else if(z->accountID < y->accountID)
+        y->left = z;
+    else
+        y->right = z;
+    z->color = RED;
+
+    /*Call insertFixUp to fix reb-black tree*/
+    insertFixUp(root, z);
 }
 
-struct node* search(node *x, int accountID)
+struct node *search(node *x, int accountID)
 {
-    while(x!=NULL)
+    extern node *nilT;
+    while(x != nilT && x->accountID != accountID)
     {
         if(accountID < x->accountID)
             x = x->left;
@@ -184,20 +192,21 @@ struct node* search(node *x, int accountID)
     return x;
 }
 
-struct node* successor(node* x)
+struct node *successor(node *x)
 {
-    node* y;
-    if(x->right != NULL)
+    extern node *nilT;
+    node *y;
+    if(x->right != nilT)
     {
         x = x->right;
-        while(x->left != NULL)
+        while(x->left != nilT)
             x = x->left;
         return x;
     }
     y = x->parent;
-    while(y != NULL && x == y->right)
+    while(y != nilT && x == y->right)
     {
-        x=y;
+        x = y;
         y = y->parent;
     }
     return y;
@@ -205,24 +214,25 @@ struct node* successor(node* x)
 
 void delete(node **root, int accountID)
 {
-    node *z = search(*root,accountID);
-    node *x,*y;
-    if(z->left == NULL || z->right == NULL)
-        y=z;
+    extern node *nilT;
+    node *z = search(*root, accountID);
+    node *x, *y;
+    if(z->left == nilT || z->right == nilT)
+        y = z;
     else
         y = successor(z);
-    if(y->left != NULL)
+    if(y->left != nilT)
         x = y->left;
     else
         x = y->right;
     x->parent = y->parent;
-    if(y->parent == NULL)
+    if(y->parent == nilT)
         *root = x;
-    else if(y==y->parent->left)
-        y->parent->left =x;
+    else if(y == y->parent->left)
+        y->parent->left = x;
     else
         y->parent->right = x;
-    if(y!=z)
+    if(y != z)
     {
         z->accountID = y->accountID;
         z->name = y->name;
@@ -230,23 +240,95 @@ void delete(node **root, int accountID)
         z->cash = y->cash;
     }
     if(y->color == BLACK)
-        deleteFixup(root,x);
-    return y;
+        deleteFixup(root, x);
 }
 
-void deleteFixup(node **root,node *x)
+void deleteFixup(node **root, node *x)
 {
-    while(x!=*root && x->color =BLACK)
+    extern node *nilT;
+    node *w;
+    while(x != *root && x->color == BLACK)
     {
         if(x == x->parent->left)
-            /********To be continue**********/
+        {
+            w = x->parent->right;
+            /*Case 1*/
+            if(w->color == RED)
+            {
+                w->color = BLACK;
+                x->parent->color = RED;
+                leftRotate(root, x->parent);
+                w = x->parent->right;
+            }
+            /*Case 2*/
+            if(w->left->color == BLACK && w->right->color == BLACK)
+            {
+                w->color = RED;
+                x = x->parent;
+            }
+                /*Case 3*/
+            else if(w->right->color == BLACK)
+            {
+                w->left->color = BLACK;
+                w->color = RED;
+                rightRotate(root, w);
+                w = x->parent->right;
+            }
+                /*Case 4*/
+            else
+            {
+                w->color = x->parent->color;
+                x->parent->color = BLACK;
+                w->right->color = BLACK;
+                leftRotate(root, x->parent);
+                x = *root;
+            }
+        }
+        else
+        {
+            w = x->parent->left;
+            /*Case 1*/
+            if(w->color == RED)
+            {
+                w->color = BLACK;
+                x->parent->color = RED;
+                rightRotate(root, x->parent);
+                w = x->parent->left;
+            }
+            /*Case 2*/
+            if(w->left->color == BLACK && w->right->color == BLACK)
+            {
+                w->color = RED;
+                x = x->parent;
+            }
+                /*Case 3*/
+            else if(w->left->color == BLACK)
+            {
+                w->right->color = BLACK;
+                w->color = RED;
+                leftRotate(root, w);
+                w = x->parent->left;
+            }
+                /*Case 4*/
+            else
+            {
+                w->color = x->parent->color;
+                x->parent->color = BLACK;
+                w->left->color = BLACK;
+                rightRotate(root, x->parent);
+                x = *root;
+            }
+        }
     }
+    x->color = BLACK;
 }
+
 
 // A utility function to traverse Red-Black tree in inorder fashion
 void inorder(node *root)
 {
-    if(root == NULL)
+    extern node *nilT;
+    if(root == nilT)
         return;
     inorder(root->left);
     printf("%d ", root->accountID);
