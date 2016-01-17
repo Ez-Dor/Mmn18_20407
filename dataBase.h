@@ -13,7 +13,7 @@ typedef struct node
     int accountID;	 // for accountID part
     char color; // for color property
     int ID;
-    int cash;
+    int balance;
     char* name;
     /*links for left, right children and parent*/
     struct node *left, *right, *parent;
@@ -22,11 +22,20 @@ typedef struct node
 void initNilT();
 void leftRotate(node **root,node *x);
 void insertFixUp(node **root,node *z);
-void insert(node **root, int accountID, int ID, int cash, char* name);
-void inorder(node *root);
-struct node* search(node *x, int accountID);
+void insertByID(node **root, int accountID, int ID, int balance, char* name);
+void insertByBalance(node **root, int accountID, int ID, int balance, char *name);
+void inorderByID(node *root);
+struct node* searchByID(node *x, int accountID);
+struct node* searchByBalance(node *x, int accountID, int balance);
 struct node* successor(node *x);
-void delete(node **root, int accountID);
+void deleteByID(node **root, int accountID);
+void deleteByBalance(node **root, int accountID,int balance);
 void deleteFixup(node **root, node *x);
 void initRandom();
 int randomNumber(int min, int max);
+void showDebtors (node *x);
+void theRicher(node **balanceTreeRoot);
+void showClientBalance(node **accountIDTreeRoot, int accountID);
+void deleteClient(node **accountIDTreeRoot, node **balanceTreeRoot, int accountID);
+void addNewClient(node **accountIDTreeRoot, node **balanceTreeRoot, int accountID, int ID, int balance, char *name);
+int updateBalance(node **accountIDTreeRoot, node **balanceTreeRoot, int accountID, int balanceChange);

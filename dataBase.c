@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include "dataBase.h"
 
-node *theRicher;
 
 /*Left Rotation*/
 void leftRotate(node **root, node *x)
@@ -130,7 +128,7 @@ void insertFixUp(node **root, node *z)
 }
 
 // Utility function to insert newly node in RedBlack tree
-void insert(node **root, int accountID, int ID, int cash, char *name)
+void insertByID(node **root, int accountID, int ID, int balance, char *name)
 {
     extern node *nilT;
     // Allocate memory for new node
@@ -141,19 +139,13 @@ void insert(node **root, int accountID, int ID, int cash, char *name)
         exit(0);
     }
     z->accountID = accountID;
-    strcpy(z->name, name);
+    z->name = name;
     z->ID = ID;
-    z->cash = cash;
+    z->balance = balance;
     z->left = nilT;
     z->right = nilT;
     z->parent = nilT;
-    if(z->cash > theRicher->cash)
-    {
-        theRicher->cash = z->cash;
-        theRicher->accountID = z->accountID;
-        theRicher->ID = z->ID;
-        strcpy(theRicher->name,z->name);
-    }
+
     node *y = nilT;
     node *x = (*root);
 
@@ -179,12 +171,68 @@ void insert(node **root, int accountID, int ID, int cash, char *name)
     insertFixUp(root, z);
 }
 
-struct node *search(node *x, int accountID)
+void insertByBalance(node **root, int accountID, int ID, int balance, char *name)
+{
+    extern node *nilT;
+    // Allocate memory for new node
+    node *z = (node *) calloc(ONE_NODE, sizeof(node));
+    if(!z)
+    {
+        printf("Memory allocation failed");
+        exit(0);
+    }
+    z->accountID = accountID;
+    z->name = name;
+    z->ID = ID;
+    z->balance = balance;
+    z->left = nilT;
+    z->right = nilT;
+    z->parent = nilT;
+
+    node *y = nilT;
+    node *x = (*root);
+
+    // Follow standard BST insert steps to first insert the node
+    while(x != nilT)
+    {
+        y = x;
+        if(z->balance < x->balance)
+            x = x->left;
+        else
+            x = x->right;
+    }
+    z->parent = y;
+    if(y == nilT)
+        (*root) = z;
+    else if(z->balance < y->balance)
+        y->left = z;
+    else
+        y->right = z;
+    z->color = RED;
+
+    /*Call insertFixUp to fix reb-black tree*/
+    insertFixUp(root, z);
+}
+
+struct node *searchByID(node *x, int accountID)
 {
     extern node *nilT;
     while(x != nilT && x->accountID != accountID)
     {
         if(accountID < x->accountID)
+            x = x->left;
+        else
+            x = x->right;
+    }
+    return x;
+}
+
+struct node *searchByBalance(node *x, int accountID, int balance)
+{
+    extern node *nilT;
+    while(x != nilT && x->balance != balance && x->accountID != accountID)
+    {
+        if(balance < x->balance)
             x = x->left;
         else
             x = x->right;
@@ -212,10 +260,10 @@ struct node *successor(node *x)
     return y;
 }
 
-void delete(node **root, int accountID)
+void deleteByID(node **root, int accountID)
 {
     extern node *nilT;
-    node *z = search(*root, accountID);
+    node *z = searchByID(*root, accountID);
     node *x, *y;
     if(z->left == nilT || z->right == nilT)
         y = z;
@@ -237,7 +285,38 @@ void delete(node **root, int accountID)
         z->accountID = y->accountID;
         z->name = y->name;
         z->ID = y->ID;
-        z->cash = y->cash;
+        z->balance = y->balance;
+    }
+    if(y->color == BLACK)
+        deleteFixup(root, x);
+}
+
+void deleteByBalance(node **root, int accountID, int balance)
+{
+    extern node *nilT;
+    node *z = searchByBalance(*root, accountID, balance);
+    node *x, *y;
+    if(z->left == nilT || z->right == nilT)
+        y = z;
+    else
+        y = successor(z);
+    if(y->left != nilT)
+        x = y->left;
+    else
+        x = y->right;
+    x->parent = y->parent;
+    if(y->parent == nilT)
+        *root = x;
+    else if(y == y->parent->left)
+        y->parent->left = x;
+    else
+        y->parent->right = x;
+    if(y != z)
+    {
+        z->accountID = y->accountID;
+        z->name = y->name;
+        z->ID = y->ID;
+        z->balance = y->balance;
     }
     if(y->color == BLACK)
         deleteFixup(root, x);
@@ -325,12 +404,13 @@ void deleteFixup(node **root, node *x)
 
 
 // A utility function to traverse Red-Black tree in inorder fashion
-void inorder(node *root)
+void inorderByID(node *root)
 {
     extern node *nilT;
     if(root == nilT)
         return;
-    inorder(root->left);
-    printf("%d ", root->accountID);
-    inorder(root->right);
+    inorderByID(root->left);
+    printf("%d-%s:%i ", root->accountID,root->name,root->balance);
+    inorderByID(root->right);
 }
+
