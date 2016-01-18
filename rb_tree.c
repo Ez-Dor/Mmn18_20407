@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "dataBase.h"
+#include "rb_tree.h"
 
 
 /*Left Rotation*/
@@ -127,11 +126,11 @@ void insertFixUp(node **root, node *z)
     (*root)->color = BLACK;
 }
 
-// Utility function to insert newly node in RedBlack tree
+/*Utility function to insert newly node in RedBlack tree*/
 void insertByID(node **root, int accountID, int ID, int balance, char *name)
 {
     extern node *nilT;
-    // Allocate memory for new node
+    /*Allocate memory for new node*/
     node *z = (node *) calloc(ONE_NODE, sizeof(node));
     if(!z)
     {
@@ -149,7 +148,7 @@ void insertByID(node **root, int accountID, int ID, int balance, char *name)
     node *y = nilT;
     node *x = (*root);
 
-    // Follow standard BST insert steps to first insert the node
+    /*Follow standard BST insert steps to first insert the node*/
     while(x != nilT)
     {
         y = x;
@@ -171,6 +170,7 @@ void insertByID(node **root, int accountID, int ID, int balance, char *name)
     insertFixUp(root, z);
 }
 
+/*The same like insert by account just for the RB-Tree by balance*/
 void insertByBalance(node **root, int accountID, int ID, int balance, char *name)
 {
     extern node *nilT;
@@ -192,7 +192,7 @@ void insertByBalance(node **root, int accountID, int ID, int balance, char *name
     node *y = nilT;
     node *x = (*root);
 
-    // Follow standard BST insert steps to first insert the node
+    /*Follow standard BST insert steps to first insert the node*/
     while(x != nilT)
     {
         y = x;
@@ -214,6 +214,7 @@ void insertByBalance(node **root, int accountID, int ID, int balance, char *name
     insertFixUp(root, z);
 }
 
+/*Search in BST for the RB-Tree by account*/
 struct node *searchByID(node *x, int accountID)
 {
     extern node *nilT;
@@ -227,6 +228,7 @@ struct node *searchByID(node *x, int accountID)
     return x;
 }
 
+/*Search in BST for the RB-Tree by balance*/
 struct node *searchByBalance(node *x, int accountID, int balance)
 {
     extern node *nilT;
@@ -240,6 +242,7 @@ struct node *searchByBalance(node *x, int accountID, int balance)
     return x;
 }
 
+/*Fine the successor like BST*/
 struct node *successor(node *x)
 {
     extern node *nilT;
@@ -260,6 +263,7 @@ struct node *successor(node *x)
     return y;
 }
 
+/*Delete node from the account RB-Tree*/
 void deleteByID(node **root, int accountID)
 {
     extern node *nilT;
@@ -291,6 +295,7 @@ void deleteByID(node **root, int accountID)
         deleteFixup(root, x);
 }
 
+/*Delete node from the balance RB-Tree*/
 void deleteByBalance(node **root, int accountID, int balance)
 {
     extern node *nilT;
@@ -317,11 +322,13 @@ void deleteByBalance(node **root, int accountID, int balance)
         z->name = y->name;
         z->ID = y->ID;
         z->balance = y->balance;
+        free(y);
     }
     if(y->color == BLACK)
         deleteFixup(root, x);
 }
 
+/*Fixeup the RB-Tree after delete*/
 void deleteFixup(node **root, node *x)
 {
     extern node *nilT;
@@ -352,6 +359,11 @@ void deleteFixup(node **root, node *x)
                 w->color = RED;
                 rightRotate(root, w);
                 w = x->parent->right;
+                w->color = x->parent->color;
+                x->parent->color = BLACK;
+                w->right->color = BLACK;
+                leftRotate(root, x->parent);
+                x = *root;
             }
                 /*Case 4*/
             else
@@ -387,6 +399,11 @@ void deleteFixup(node **root, node *x)
                 w->color = RED;
                 leftRotate(root, w);
                 w = x->parent->left;
+                w->color = x->parent->color;
+                x->parent->color = BLACK;
+                w->left->color = BLACK;
+                rightRotate(root, x->parent);
+                x = *root;
             }
                 /*Case 4*/
             else
@@ -403,14 +420,14 @@ void deleteFixup(node **root, node *x)
 }
 
 
-// A utility function to traverse Red-Black tree in inorder fashion
+/*A utility function to traverse Red-Black tree in inorder fashion*/
 void inorderByID(node *root)
 {
     extern node *nilT;
     if(root == nilT)
         return;
     inorderByID(root->left);
-    printf("%d-%s:%i ", root->accountID,root->name,root->balance);
+    printf("%d-%s:%i ", root->accountID, root->name, root->balance);
     inorderByID(root->right);
 }
 
