@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1453148458 source:c:\users\user\documents\school\20407\mmn18_20407\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"rb_tree.h"
+
+1453148539 c:\users\user\documents\school\20407\mmn18_20407\rb_tree.h
+
+1453148553 source:c:\users\user\documents\school\20407\mmn18_20407\rb_tree.c
+	<stdio.h>
+	<stdlib.h>
+	"rb_tree.h"
+
