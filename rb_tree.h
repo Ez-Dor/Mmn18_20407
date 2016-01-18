@@ -1,7 +1,7 @@
 #ifndef MMN18_20407_DATABASE_H
 #define MMN18_20407_DATABASE_H
 
-#endif //MMN18_20407_DATABASE_H
+#endif
 /*Constants*/
 #define RED 'r'
 #define BLACK 'b'
@@ -10,8 +10,8 @@
 /*A Red-Black tree node structure*/
 typedef struct node
 {
-    int accountID;     // for accountID part
-    char color; // for color property
+    int accountID;
+    char color;
     int ID;
     int balance;
     char *name;

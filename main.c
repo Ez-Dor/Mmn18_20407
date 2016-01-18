@@ -21,6 +21,11 @@ int main(int argc, char *argv[])
     char **name;
     char temp[30];
     FILE *fp = fopen("input.txt", "r");
+    if(!fp)
+    {
+        printf("Input file is missing please configure your working directory\n");
+        exit(0);
+    }
     node *accountIDTreeRoot, *balanceTreeRoot;
     if(argc == 1)
     {

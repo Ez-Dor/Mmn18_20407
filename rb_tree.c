@@ -174,7 +174,7 @@ void insertByID(node **root, int accountID, int ID, int balance, char *name)
 void insertByBalance(node **root, int accountID, int ID, int balance, char *name)
 {
     extern node *nilT;
-    // Allocate memory for new node
+     /*Allocate memory for new node*/
     node *z = (node *) calloc(ONE_NODE, sizeof(node));
     if(!z)
     {
