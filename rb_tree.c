@@ -130,6 +130,8 @@ void insertFixUp(node **root, node *z)
 void insertByID(node **root, int accountID, int ID, int balance, char *name)
 {
     extern node *nilT;
+    node *y = nilT;
+    node *x = (*root);
     /*Allocate memory for new node*/
     node *z = (node *) calloc(ONE_NODE, sizeof(node));
     if(!z)
@@ -145,8 +147,6 @@ void insertByID(node **root, int accountID, int ID, int balance, char *name)
     z->right = nilT;
     z->parent = nilT;
 
-    node *y = nilT;
-    node *x = (*root);
 
     /*Follow standard BST insert steps to first insert the node*/
     while(x != nilT)
@@ -174,7 +174,9 @@ void insertByID(node **root, int accountID, int ID, int balance, char *name)
 void insertByBalance(node **root, int accountID, int ID, int balance, char *name)
 {
     extern node *nilT;
-     /*Allocate memory for new node*/
+    node *y = nilT;
+    node *x = (*root);
+    /*Allocate memory for new node*/
     node *z = (node *) calloc(ONE_NODE, sizeof(node));
     if(!z)
     {
@@ -189,8 +191,6 @@ void insertByBalance(node **root, int accountID, int ID, int balance, char *name
     z->right = nilT;
     z->parent = nilT;
 
-    node *y = nilT;
-    node *x = (*root);
 
     /*Follow standard BST insert steps to first insert the node*/
     while(x != nilT)
@@ -431,3 +431,13 @@ void inorderByID(node *root)
     inorderByID(root->right);
 }
 
+/*Free the memory that allocated to the tree*/
+void freeRBTree(node *root)
+{
+    extern node *nilT;
+    if(root == nilT)
+        return;
+    freeRBTree(root->left);
+    freeRBTree(root->right);
+    free(root);
+}

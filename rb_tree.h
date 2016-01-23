@@ -61,3 +61,5 @@ int updateBalance(node **accountIDTreeRoot, node **balanceTreeRoot, int accountI
 void initNilT();
 
 int lineCounter(FILE *file);
+
+void freeRBTree(node *root);

@@ -20,13 +20,13 @@ int main(int argc, char *argv[])
     int accountID, cash, i, id, lineNumbers;
     char **name;
     char temp[30];
+    node *accountIDTreeRoot, *balanceTreeRoot;
     FILE *fp = fopen("input.txt", "r");
     if(!fp)
     {
         printf("Input file is missing please configure your working directory\n");
         exit(0);
     }
-    node *accountIDTreeRoot, *balanceTreeRoot;
     if(argc == 1)
     {
         printf("Please insert command");
@@ -45,9 +45,9 @@ int main(int argc, char *argv[])
     balanceTreeRoot->right = nilT;
 
     /*Reading from the input file - initiate the program with clients the init input can be edit from the
-     * input.txt file (attached) - in each edit make sure the firs line is like before*/
+     * input.txt file (attached) - in each edit make sure the first line is like before*/
     lineNumbers = lineCounter(fp);
-    /*Allocate memory for the names frome the input file*/
+    /*Allocate memory for the names from the input file*/
     name = (char **) calloc(lineNumbers, sizeof(char *));
     if(!name)
     {
@@ -99,7 +99,14 @@ int main(int argc, char *argv[])
     else
         updateBalance(&accountIDTreeRoot, &balanceTreeRoot, atoi(argv[THIRD_ARGUMENT]), atoi(argv[FOURTH_ARGUMENT]));
 
+    /*C mange memory*/
+    for(i = 0; i < lineNumbers; i++)
+    {
+        free(name[i]);
+    }
     free(name);
+    freeRBTree(balanceTreeRoot);
+    freeRBTree(accountIDTreeRoot);
     free(nilT);
     return 0;
 }
