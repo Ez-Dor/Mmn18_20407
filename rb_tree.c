@@ -232,9 +232,17 @@ struct node *searchByID(node *x, int accountID)
 struct node *searchByBalance(node *x, int accountID, int balance)
 {
     extern node *nilT;
-    while(x != nilT && x->balance != balance && x->accountID != accountID)
+    node *temp;
+    while(x != nilT && x->accountID != accountID)
     {
-        if(balance < x->balance)
+        if(x->balance == balance)
+        {
+            temp = x;
+            x = searchByBalance(temp->left,accountID,balance);
+            if(x == nilT)
+                x = searchByBalance(temp->right,accountID,balance);
+        }
+        else if(balance < x->balance)
             x = x->left;
         else
             x = x->right;
