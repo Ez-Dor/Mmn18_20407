@@ -6,15 +6,19 @@
 #define RED 'r'
 #define BLACK 'b'
 #define ONE_NODE 1
+#define MAX_ACCOUNT_NUMBER 999999
+#define  MIN_ACCOUNT_NUMBER 100000
+#define ACCOUNT_CHARACTERS 7
 
 /*A Red-Black tree node structure*/
 typedef struct node
 {
+    long long int key;
     int accountID;
-    char color;
     int ID;
     int balance;
     char *name;
+    char color;
     /*links for left, right children and parent*/
     struct node *left, *right, *parent;
 } node;
@@ -34,13 +38,13 @@ void inorderByID(node *root);
 
 struct node *searchByID(node *x, int accountID);
 
-struct node *searchByBalance(node *x, int accountID, int balance);
+struct node *searchByBalance(node *x, long long int key);
 
 struct node *successor(node *x);
 
 void deleteByID(node **root, int accountID);
 
-void deleteByBalance(node **root, int accountID, int balance);
+void deleteByBalance(node **root, long long int key);
 
 void deleteFixup(node **root, node *x);
 
@@ -61,5 +65,7 @@ int updateBalance(node **accountIDTreeRoot, node **balanceTreeRoot, int accountI
 void initNilT();
 
 int lineCounter(FILE *file);
+
+long long int getKey(int accountID, int balance);
 
 void freeRBTree(node *root);

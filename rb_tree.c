@@ -143,6 +143,7 @@ void insertByID(node **root, int accountID, int ID, int balance, char *name)
     z->name = name;
     z->ID = ID;
     z->balance = balance;
+    z->key = getKey(accountID, balance);
     z->left = nilT;
     z->right = nilT;
     z->parent = nilT;
@@ -183,6 +184,7 @@ void insertByBalance(node **root, int accountID, int ID, int balance, char *name
         printf("Memory allocation failed");
         exit(0);
     }
+    z->key = getKey(accountID, balance);
     z->accountID = accountID;
     z->name = name;
     z->ID = ID;
@@ -196,7 +198,7 @@ void insertByBalance(node **root, int accountID, int ID, int balance, char *name
     while(x != nilT)
     {
         y = x;
-        if(z->balance < x->balance)
+        if(z->key < x->key)
             x = x->left;
         else
             x = x->right;
@@ -204,7 +206,7 @@ void insertByBalance(node **root, int accountID, int ID, int balance, char *name
     z->parent = y;
     if(y == nilT)
         (*root) = z;
-    else if(z->balance < y->balance)
+    else if(z->key < y->key)
         y->left = z;
     else
         y->right = z;
@@ -229,20 +231,12 @@ struct node *searchByID(node *x, int accountID)
 }
 
 /*Search in BST for the RB-Tree by balance*/
-struct node *searchByBalance(node *x, int accountID, int balance)
+struct node *searchByBalance(node *x, long long int key)
 {
     extern node *nilT;
-    node *temp;
-    while(x != nilT && x->accountID != accountID)
+    while(x != nilT && x->key != key)
     {
-        if(x->balance == balance)
-        {
-            temp = x;
-            x = searchByBalance(temp->left,accountID,balance);
-            if(x == nilT)
-                x = searchByBalance(temp->right,accountID,balance);
-        }
-        else if(balance < x->balance)
+        if(key < x->key)
             x = x->left;
         else
             x = x->right;
@@ -298,16 +292,17 @@ void deleteByID(node **root, int accountID)
         z->name = y->name;
         z->ID = y->ID;
         z->balance = y->balance;
+        z->key = y->key;
     }
     if(y->color == BLACK)
         deleteFixup(root, x);
 }
 
 /*Delete node from the balance RB-Tree*/
-void deleteByBalance(node **root, int accountID, int balance)
+void deleteByBalance(node **root, long long int key)
 {
     extern node *nilT;
-    node *z = searchByBalance(*root, accountID, balance);
+    node *z = searchByBalance(*root, key);
     node *x, *y;
     if(z->left == nilT || z->right == nilT)
         y = z;
@@ -330,6 +325,7 @@ void deleteByBalance(node **root, int accountID, int balance)
         z->name = y->name;
         z->ID = y->ID;
         z->balance = y->balance;
+        z->key = y->key;
         free(y);
     }
     if(y->color == BLACK)
@@ -448,4 +444,19 @@ void freeRBTree(node *root)
     freeRBTree(root->left);
     freeRBTree(root->right);
     free(root);
+}
+
+/*The balance tree should get a valid value without copies so the function create a valid
+ * value for the the value contain the balance in the left 9 characters and in 7 from the right the account number */
+long long int getKey(int accountID, int balance)
+{
+    long long int key = balance;
+    int i;
+    for(i = 0; i < ACCOUNT_CHARACTERS; ++i)
+    {
+        key = key * 10;
+    }
+    key += accountID;
+
+    return key;
 }

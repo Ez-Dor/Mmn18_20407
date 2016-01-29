@@ -87,7 +87,10 @@ int main(int argc, char *argv[])
         strcpy(temp, argv[SECOND_ARGUMENT]);
         strcat(temp, " ");
         strcat(temp, argv[THIRD_ARGUMENT]);
-        addNewClient(&accountIDTreeRoot, &balanceTreeRoot, atoi(argv[FIFTH_ARGUMENT]), atoi(argv[FOURTH_ARGUMENT]),
+        if(atoi(argv[FIFTH_ARGUMENT])>MAX_ACCOUNT_NUMBER || atoi(argv[FIFTH_ARGUMENT])<MIN_ACCOUNT_NUMBER)
+                    printf("Incorrect account number please insert account number between %i - %i",MIN_ACCOUNT_NUMBER,MAX_ACCOUNT_NUMBER);
+        else
+            addNewClient(&accountIDTreeRoot, &balanceTreeRoot, atoi(argv[FIFTH_ARGUMENT]), atoi(argv[FOURTH_ARGUMENT]),
                      atoi(argv[SIXTH_ARGUMENT]), temp);
     }
         /*Delete client*/
@@ -136,7 +139,7 @@ int updateBalance(node **accountIDTreeRoot, node **balanceTreeRoot, int accountI
         printf("Account number incorrect");
         exit(0);
     }
-    deleteByBalance(balanceTreeRoot, x->accountID, x->balance);
+    deleteByBalance(balanceTreeRoot, x->key);
     x->balance = x->balance + balanceChange;
     insertByBalance(balanceTreeRoot, x->accountID, x->ID, x->balance, x->name);
     printf("Dear %s your correct balance is: %i\n", x->name, x->balance);
@@ -159,7 +162,7 @@ void deleteClient(node **accountIDTreeRoot, node **balanceTreeRoot, int accountI
     strcpy(name, x->name);
     if(x->balance == 0)
     {
-        deleteByBalance(balanceTreeRoot, x->accountID, x->balance);
+        deleteByBalance(balanceTreeRoot, x->key);
         deleteByID(accountIDTreeRoot, x->accountID);
         printf("The client %s left us :( his account number was %i RIP\n", name, accountID);
     }
