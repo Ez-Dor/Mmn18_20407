@@ -141,6 +141,7 @@ int updateBalance(node **accountIDTreeRoot, node **balanceTreeRoot, int accountI
     }
     deleteByBalance(balanceTreeRoot, x->key);
     x->balance = x->balance + balanceChange;
+    x->key = getKey(x->accountID,x->balance);
     insertByBalance(balanceTreeRoot, x->accountID, x->ID, x->balance, x->name);
     printf("Dear %s your correct balance is: %i\n", x->name, x->balance);
     return x->balance;
