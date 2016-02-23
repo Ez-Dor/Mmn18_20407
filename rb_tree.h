@@ -51,7 +51,7 @@ void deleteFixup(node **root, node *x);
 /*Bank program functions*/
 void showDebtors(node *x);
 
-void theRicher(node **balanceTreeRoot);
+node *theRichest(node **balanceTreeRoot);
 
 void showClientBalance(node **accountIDTreeRoot, int accountID);
 
@@ -59,7 +59,7 @@ void deleteClient(node **accountIDTreeRoot, node **balanceTreeRoot, int accountI
 
 void addNewClient(node **accountIDTreeRoot, node **balanceTreeRoot, int accountID, int ID, int balance, char *name);
 
-int updateBalance(node **accountIDTreeRoot, node **balanceTreeRoot, int accountID, int balanceChange);
+void updateBalance(node **accountIDTreeRoot, node **balanceTreeRoot, int accountID, int balanceChange);
 
 /*Other functions*/
 void initNilT();

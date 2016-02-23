@@ -14,6 +14,9 @@
 /*Global variable for the nil[T]*/
 node *nilT;
 
+/*Global variable for the max balance*/
+node *richest;
+
 int main(int argc, char *argv[])
 {
     /*Variables*/
@@ -34,6 +37,7 @@ int main(int argc, char *argv[])
     }
     /*Initiate the global nil[T]*/
     initNilT();
+    richest = nilT;
     /*Create roots for the to RB-Trees one order by the account number and the second by the balance*/
     accountIDTreeRoot = nilT;
     balanceTreeRoot = nilT;
@@ -69,13 +73,14 @@ int main(int argc, char *argv[])
         /*Insert the client to the RB-Trees (both)*/
         insertByID(&accountIDTreeRoot, accountID, id, cash, name[i]);
         insertByBalance(&balanceTreeRoot, accountID, id, cash, name[i]);
+
     }
     fclose(fp);
     /*Check if it's a query and assign to the relevant function*/
     if(!strcmp(argv[FIRST_ARGUMENT], "?"))
     {
         if(!strcmp(argv[SECOND_ARGUMENT], "MAX"))
-            theRicher(&balanceTreeRoot);
+            printf("Wow!! the richest is %s with account number %i and his balance %i\n", richest->name, richest->accountID, richest->balance);
         else if(!strcmp(argv[SECOND_ARGUMENT], "MINUS"))
             showDebtors(balanceTreeRoot);
         else
@@ -87,11 +92,12 @@ int main(int argc, char *argv[])
         strcpy(temp, argv[SECOND_ARGUMENT]);
         strcat(temp, " ");
         strcat(temp, argv[THIRD_ARGUMENT]);
-        if(atoi(argv[FIFTH_ARGUMENT])>MAX_ACCOUNT_NUMBER || atoi(argv[FIFTH_ARGUMENT])<MIN_ACCOUNT_NUMBER)
-                    printf("Incorrect account number please insert account number between %i - %i",MIN_ACCOUNT_NUMBER,MAX_ACCOUNT_NUMBER);
+        if(atoi(argv[FIFTH_ARGUMENT]) > MAX_ACCOUNT_NUMBER || atoi(argv[FIFTH_ARGUMENT]) < MIN_ACCOUNT_NUMBER)
+            printf("Incorrect account number please insert account number between %i - %i", MIN_ACCOUNT_NUMBER,
+                   MAX_ACCOUNT_NUMBER);
         else
             addNewClient(&accountIDTreeRoot, &balanceTreeRoot, atoi(argv[FIFTH_ARGUMENT]), atoi(argv[FOURTH_ARGUMENT]),
-                     atoi(argv[SIXTH_ARGUMENT]), temp);
+                         atoi(argv[SIXTH_ARGUMENT]), temp);
     }
         /*Delete client*/
     else if(!strcmp(argv[FIRST_ARGUMENT], "-"))
@@ -131,20 +137,27 @@ void initNilT()
 
 
 /*If client update his balance we should change it in the balance tree and the account tree*/
-int updateBalance(node **accountIDTreeRoot, node **balanceTreeRoot, int accountID, int balanceChange)
+void updateBalance(node **accountIDTreeRoot, node **balanceTreeRoot, int accountID, int balanceChange)
 {
     node *x = searchByID(*accountIDTreeRoot, accountID);
     if(x == nilT)
     {
         printf("Account number incorrect");
-        exit(0);
     }
-    deleteByBalance(balanceTreeRoot, x->key);
+
+    /*Keep on the richest*/
+    if(x->key == richest->key && balanceChange < 0)
+    {
+        deleteByBalance(balanceTreeRoot, x->key);
+        richest = theRichest(balanceTreeRoot);
+    }
+    else
+        deleteByBalance(balanceTreeRoot, x->key);
+
     x->balance = x->balance + balanceChange;
-    x->key = getKey(x->accountID,x->balance);
+    x->key = getKey(x->accountID, x->balance);
     insertByBalance(balanceTreeRoot, x->accountID, x->ID, x->balance, x->name);
     printf("Dear %s your correct balance is: %i\n", x->name, x->balance);
-    return x->balance;
 }
 
 /*Add new client to the RB-Trees (both)*/
@@ -163,8 +176,18 @@ void deleteClient(node **accountIDTreeRoot, node **balanceTreeRoot, int accountI
     strcpy(name, x->name);
     if(x->balance == 0)
     {
-        deleteByBalance(balanceTreeRoot, x->key);
-        deleteByID(accountIDTreeRoot, x->accountID);
+        /*Keep on the richest*/
+        if(x->key == richest->key)
+        {
+            deleteByBalance(balanceTreeRoot, x->key);
+            deleteByID(accountIDTreeRoot, x->accountID);
+            richest = theRichest(balanceTreeRoot);
+        }
+        else
+        {
+            deleteByBalance(balanceTreeRoot, x->key);
+            deleteByID(accountIDTreeRoot, x->accountID);
+        }
         printf("The client %s left us :( his account number was %i RIP\n", name, accountID);
     }
     else
@@ -179,13 +202,13 @@ void showClientBalance(node **accountIDTreeRoot, int accountID)
     printf("Hey %s your balance is: %i i hope you glad\n", x->name, x->balance);
 }
 
-/*For the MAX query print the user with the higher balance*/
-void theRicher(node **balanceTreeRoot)
+/*Returns the user with the higher balance*/
+node *theRichest(node **balanceTreeRoot)
 {
     node *x = (*balanceTreeRoot);
     while(x->right != nilT)
         x = x->right;
-    printf("Wow!! the richer is %s with account number %i and his balance %i\n", x->name, x->accountID, x->balance);
+    return x;
 }
 
 /*For MINUS query show all the debtors*/

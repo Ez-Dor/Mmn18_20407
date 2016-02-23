@@ -174,7 +174,7 @@ void insertByID(node **root, int accountID, int ID, int balance, char *name)
 /*The same like insert by account just for the RB-Tree by balance*/
 void insertByBalance(node **root, int accountID, int ID, int balance, char *name)
 {
-    extern node *nilT;
+    extern node *nilT, *richest;
     node *y = nilT;
     node *x = (*root);
     /*Allocate memory for new node*/
@@ -192,6 +192,9 @@ void insertByBalance(node **root, int accountID, int ID, int balance, char *name
     z->left = nilT;
     z->right = nilT;
     z->parent = nilT;
+    /*Keep on the richest actually is*/
+    if(richest == nilT || z->balance > richest->balance)
+        richest = z;
 
 
     /*Follow standard BST insert steps to first insert the node*/
